@@ -22,36 +22,42 @@ def run(videos_id_list, out_dir_root="./data/youtube"):
     for video_id in videos_id_list:
         try:
             print(video_id)
-            out_path = download_video(video_id, out_dir_root)
-            print(out_path, "Download finished")
+            out_path = join(out_dir_root, video_id, "video")
+            extract_frames(out_path)
+            print(out_path, "Extract finished")
         except Exception as e:
             print(e)
 
 
-def download_video(yt_id, out_dir_root):
-    """Download a video.
+def extract_frames(out_path):
+    """Extract frames from the video.
+       The method saves all frames, not just an annotated subset.
 
     Args:
-        yt_id: YouTube video ID.
-        out_dir_root: Output directory.
-
-    Returns:
-        Filepath to the video directory.
+        out_path: Filepath to the video directory.
     """
-    out_path = join(out_dir_root, yt_id, "video")
-    os.makedirs(out_path, exist_ok=True)
-
     vid_path = join(out_path, "raw.mp4")
+    f_out_path = join(out_path, "frames")
+    os.makedirs(f_out_path, exist_ok=True)
 
-    if not os.path.exists(vid_path):
-        print("Download a video.")
-        YouTube(join(YT_ROOT, yt_id)).streams.filter(subtype="mp4", only_video=True).order_by(
-            "resolution"
-        ).desc().first().download(out_path)
 
-        os.rename(join(out_path, os.listdir(out_path)[0]), vid_path)
+    vidcap = cv2.VideoCapture(vid_path, cv2.CAP_FFMPEG)
+    count = 0
+    vid_len = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+    saved_frames = len(glob.glob(join(out_path, "frames", "*.png")))
+    print("video length: ", vid_len)
+    
+    if saved_frames >= vid_len: # sometimes the extracted frames have 1 frames more than the cv2.CAP_PROP_FRAME_COUNT
+        print(f"{f_out_path} already has {saved_frames} frames, skip")
+        return
 
-    return out_path
+    print(f"saved_frames {saved_frames}, vid_len {vid_len}")
+    print("Extract frames.")
+
+    try:
+        os.system(f"ffmpeg -i {vid_path} -start_number 0 {f_out_path}/%d.png ")
+    except Exception as e:
+        print(e)
 
 
 
