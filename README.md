@@ -7,6 +7,64 @@ by Dominik Kulon, Riza Alp Güler, Iasonas Kokkinos, Michael Bronstein, Stefanos
 Project website: https://www.arielai.com/mesh_hands/  
 Contact: <hands.dataset@arielai.com>
 
+# What's new in this forked version
+
+First, I made the download (video.mp4) and extract (frame.png) separate. 
+
+Download video
+```shell
+# Download all videos from the training set.
+$ python download_images.py --set train
+
+# Download all videos from the test and validation sets.
+$ python download_images.py --set test
+```
+Extract video
+```shell
+# Extract all videos from the training set.
+$ python extract_images.py --set train
+
+# Extract all videos from the test and validation sets.
+$ python extract_images.py --set test
+```
+
+Second,   
+After download and extraction, the total size of `data/youtube` is near 1TB. However, I find that most of frames are not paired with annoations. ONLY **74GB** from 1TB images are paired with annotations. 
+I decide to remove those unused frames.
+
+The scripts below copy the annotated frames from `data/youtube` to:  `data/youtebe_annotated`.
+```shell
+$ python copy_labeled_frames.py
+```
+Now you can savely delete the  `data/youtube`, and use the `data/youtube_annotated` instead.
+
+This data repository have the structure like:
+```
+data -> /some_big_disk/YouTube-3D-Hand
+├── LICENSE
+├── youtube # you can delete this 1TB frames.
+│   └── ...
+├── youtube_annotated
+│   ├── 0mKYdyyezNU
+│   ├── 1lbg4Kck_AI
+│   ├── 1VyRsTPK_Qk
+│   ├── 2q7gpbOrIsY
+│   ├── ...
+│   └── zKtHssyBJ4s
+├── youtube_test.json
+├── youtube_train.json
+└── youtube_val.json
+```
+
+Third, visualize the dataset.   
+You need an inteactive screen to visualzie.
+```shell
+# this scripts uses the data/youtube_annotated frames. 
+$ python visualize_db.py --set train
+```
+
+
+
 ## Preview
 
 ![Preview](./preview.jpg)
